@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SearchBar } from "@/components/search-bar";
-import { BookOpen, Sparkles } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api/client";
+import { BookOpen, Sparkles, FolderOpen } from "lucide-react";
+import { useProject } from "@/lib/project-context";
+import { CreateProjectDialog } from "@/components/project-manager";
 import {
   Select,
   SelectContent,
@@ -17,20 +17,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
   const router = useRouter();
-  const [projectId, setProjectId] = useState<string>("1");
+  const { projectId, setProjectId, projects, isLoading } = useProject();
   const [mode, setMode] = useState<string>("standard");
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["projects"],
-    queryFn: () => apiClient.projects.list(),
-  });
-
   const handleSearch = (query: string) => {
-    // Navigate to Search Results page with parameters
+    if (!projectId) return;
     const params = new URLSearchParams({
       q: query,
       mode,
-      projectId,
+      projectId: projectId.toString(),
     });
     router.push(`/search?${params.toString()}`);
   };
@@ -45,31 +40,42 @@ export default function Home() {
       </div>
 
       <p className="mb-12 max-w-[600px] text-lg text-muted-foreground">
-        Your intelligent assistant for literature review and paper curation. 
+        Your intelligent assistant for literature review and paper curation.
         Search across 6+ academic sources with AI-powered relevance scoring.
       </p>
 
       <div className="w-full max-w-3xl space-y-6">
         <div className="flex items-center gap-4 rounded-xl bg-card p-4 shadow-sm border">
           <div className="flex-1 space-y-2 text-left">
-            <label className="text-sm font-medium text-muted-foreground ml-1">
-              Active Project
+            <label className="text-sm font-medium text-muted-foreground ml-1 flex items-center gap-2">
+              <FolderOpen className="w-3 h-3" /> Active Project
             </label>
             {isLoading ? (
               <Skeleton className="h-10 w-full" />
+            ) : projects.length === 0 ? (
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">No projects yet.</p>
+                <CreateProjectDialog />
+              </div>
             ) : (
-              <Select value={projectId} onValueChange={(v) => v && setProjectId(v)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a project" />
-                </SelectTrigger>
-                <SelectContent>
-                  {data?.projects.map((p) => (
-                    <SelectItem key={p.id} value={p.id.toString()}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex items-center gap-2">
+                <Select
+                  value={projectId?.toString() || ""}
+                  onValueChange={(v) => v && setProjectId(parseInt(v))}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a project" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map((p: any) => (
+                      <SelectItem key={p.id} value={p.id.toString()}>
+                        {p.name} ({p.paper_counts?.total || 0} papers)
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <CreateProjectDialog />
+              </div>
             )}
           </div>
           <div className="flex-[0.5] space-y-2 text-left">
@@ -90,7 +96,7 @@ export default function Home() {
         </div>
 
         <SearchBar onSearch={handleSearch} />
-        
+
         <div className="flex flex-wrap items-center justify-center gap-2 pt-4 text-sm text-muted-foreground">
           <span>Try searching for:</span>
           {["PINN fatigue prediction", "LLM agent architecture", "RAG evaluation metrics"].map((term) => (

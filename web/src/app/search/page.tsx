@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/client";
+import { useProject } from "@/lib/project-context";
 import { PaperCard } from "@/components/paper-card";
 import { SearchBar } from "@/components/search-bar";
 import { Sparkles, Filter, SlidersHorizontal } from "lucide-react";
@@ -15,16 +16,15 @@ function SearchResultsContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
   const mode = searchParams.get("mode") || "standard";
-  const projectId = searchParams.get("projectId") || "1";
+  const { projectId } = useProject();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["search", projectId, query, mode],
     queryFn: () => apiClient.search.execute(Number(projectId), query, mode),
-    enabled: !!query,
+    enabled: !!query && !!projectId,
   });
 
   const handleNewSearch = (newQuery: string) => {
-    // In a real app we'd push to router, here we just observe the component would re-render if we did
     window.location.href = `/search?q=${encodeURIComponent(newQuery)}&mode=${mode}&projectId=${projectId}`;
   };
 
@@ -56,7 +56,7 @@ function SearchResultsContent() {
                     Searching across {mode === "deep" ? "6" : mode === "standard" ? "3" : "1"} sources...
                   </span>
                 ) : data ? (
-                  `Found ${data.papers_found} papers (${data.papers_deduped - data.already_in_project} new to project) for "${query}"`
+                  `Found ${data.papers_found} papers (${data.papers_new || 0} new to project) for "${query}"`
                 ) : (
                   "Enter a query to begin."
                 )}
@@ -79,17 +79,17 @@ function SearchResultsContent() {
               ))}
             </div>
           ) : error ? (
-            <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-destructive">
+            <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-6 text-destructive">
               <p className="font-semibold">Search failed</p>
               <p className="text-sm mt-1">{(error as Error).message}</p>
             </div>
           ) : data?.papers?.length ? (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
               {data.papers.map((paper: any) => (
-                <PaperCard 
-                  key={`temp-${paper.temp_index}`} 
-                  paper={paper} 
-                  originalProjectId={Number(projectId)} 
+                <PaperCard
+                  key={`temp-${paper.temp_index}`}
+                  paper={paper}
+                  originalProjectId={Number(projectId)}
                   searchId={data.search_id}
                 />
               ))}

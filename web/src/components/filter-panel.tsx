@@ -1,63 +1,127 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Filter } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Filter, Search } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+
+export interface FilterState {
+  is_included?: string;
+  year_min?: number;
+  year_max?: number;
+  q?: string;
+}
 
 interface FilterPanelProps {
-  onFilterChange: (filters: Record<string, any>) => void;
+  onFilterChange: (filters: FilterState) => void;
   showIncludeStatus?: boolean;
 }
 
 export function FilterPanel({ onFilterChange, showIncludeStatus = false }: FilterPanelProps) {
-  // In a real app, this would use local state to track checked filters
-  // and then bubble up `onFilterChange` when apply is clicked or on change.
-  // We're keeping it static for the mockup.
+  const [open, setOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterState>({});
+  const [searchText, setSearchText] = useState("");
+
+  const handleApply = () => {
+    const applied: FilterState = { ...filters };
+    if (searchText.trim()) {
+      applied.q = searchText.trim();
+    }
+    onFilterChange(applied);
+    setOpen(false);
+  };
+
+  const handleClear = () => {
+    setFilters({});
+    setSearchText("");
+    onFilterChange({});
+    setOpen(false);
+  };
 
   return (
-    <div className="flex items-center gap-2">
-      <DropdownMenu>
-        <DropdownMenuTrigger>
-          <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 gap-1">
-            <Filter className="h-3.5 w-3.5" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Filter
-            </span>
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger className="inline-flex shrink-0 items-center justify-center rounded-lg border border-border bg-background text-sm font-medium hover:bg-muted hover:text-foreground h-7 gap-1 px-2.5">
+        <Filter className="h-4 w-4" />
+        Filter
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-[280px] p-4">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Search in titles & abstracts</label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="e.g., neural network"
+                className="pl-8"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+            </div>
           </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-[200px]">
-          <DropdownMenuLabel>Sources</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem checked>OpenAlex</DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem checked>Semantic Scholar</DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem>arXiv</DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem>CrossRef</DropdownMenuCheckboxItem>
-          
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel>Publication Year</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem>Last 2 Years</DropdownMenuCheckboxItem>
-          <DropdownMenuCheckboxItem>Last 5 Years</DropdownMenuCheckboxItem>
 
           {showIncludeStatus && (
             <>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Status</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked>Included</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem checked>Undecided</DropdownMenuCheckboxItem>
-              <DropdownMenuCheckboxItem>Excluded</DropdownMenuCheckboxItem>
+              <Separator />
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <div className="space-y-2">
+                  {[
+                    { label: "Included", value: "true" },
+                    { label: "Excluded", value: "false" },
+                    { label: "Undecided", value: "null" },
+                  ].map((opt) => (
+                    <label key={opt.value} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <Checkbox
+                        checked={filters.is_included === opt.value}
+                        onCheckedChange={(checked) => {
+                          setFilters(prev => ({
+                            ...prev,
+                            is_included: checked ? opt.value : undefined,
+                          }));
+                        }}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+              </div>
             </>
           )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+
+          <Separator />
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Year Range</label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                placeholder="From"
+                className="w-24"
+                value={filters.year_min || ""}
+                onChange={(e) => setFilters(prev => ({ ...prev, year_min: e.target.value ? parseInt(e.target.value) : undefined }))}
+              />
+              <span className="text-muted-foreground">&mdash;</span>
+              <Input
+                type="number"
+                placeholder="To"
+                className="w-24"
+                value={filters.year_max || ""}
+                onChange={(e) => setFilters(prev => ({ ...prev, year_max: e.target.value ? parseInt(e.target.value) : undefined }))}
+              />
+            </div>
+          </div>
+
+          <Separator />
+          <div className="flex justify-between">
+            <Button variant="ghost" size="sm" onClick={handleClear}>Clear all</Button>
+            <Button size="sm" onClick={handleApply} className="gap-2">
+              <Filter className="h-3 w-3" /> Apply
+            </Button>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
