@@ -7,16 +7,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files
+# Copy everything needed for install
 COPY pyproject.toml ./
-
-# Install Python dependencies
-RUN pip install --no-cache-dir .
-
-# Copy source code
 COPY src/ src/
 COPY config.yaml ./
 COPY scripts/ scripts/
+
+# Install Python dependencies
+RUN pip install --no-cache-dir .
 
 # Create data directory (will be overridden by Railway Volume)
 RUN mkdir -p /data
