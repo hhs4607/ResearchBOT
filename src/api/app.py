@@ -1,5 +1,6 @@
 """FastAPI application factory."""
 
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -31,9 +32,14 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    frontend_url = os.environ.get("FRONTEND_URL", "")
+    allowed_origins = ["http://localhost:3000"]
+    if frontend_url:
+        allowed_origins.append(frontend_url)
+
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

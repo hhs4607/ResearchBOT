@@ -78,10 +78,14 @@ def load_config() -> Config:
     cfg_yaml = _load_yaml()
     config = Config()
 
-    # Database
-    db_cfg = cfg_yaml.get("database", {})
-    if "path" in db_cfg:
-        config.db_path = PROJECT_ROOT / db_cfg["path"]
+    # Database — env var takes priority, then YAML, then default
+    env_db_path = os.environ.get("DATABASE_PATH")
+    if env_db_path:
+        config.db_path = Path(env_db_path)
+    else:
+        db_cfg = cfg_yaml.get("database", {})
+        if "path" in db_cfg:
+            config.db_path = PROJECT_ROOT / db_cfg["path"]
 
     # Search
     search_cfg = cfg_yaml.get("search", {})

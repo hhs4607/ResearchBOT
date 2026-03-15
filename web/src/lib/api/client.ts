@@ -1,22 +1,24 @@
 import { ProjectListOut, ProjectDetailOut, PaperListOut, PaperDetailOut } from "./types";
 import { MOCK_PROJECTS, MOCK_PAPERS } from "./mocks/data";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const apiClient = {
   projects: {
     list: async (): Promise<ProjectListOut> => {
-      const res = await fetch("/api/projects");
+      const res = await fetch(`${API_BASE}/api/projects`);
       if (!res.ok) throw new Error("Failed to fetch projects");
       return res.json();
     },
     get: async (id: number): Promise<ProjectDetailOut> => {
-      const res = await fetch(`/api/projects/${id}`);
+      const res = await fetch(`${API_BASE}/api/projects/${id}`);
       if (!res.ok) throw new Error("Failed to fetch project details");
       return res.json();
     },
     create: async (data: { name: string; description?: string }) => {
-      const res = await fetch("/api/projects", {
+      const res = await fetch(`${API_BASE}/api/projects`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -25,13 +27,13 @@ export const apiClient = {
       return res.json();
     },
     delete: async (id: number) => {
-      const res = await fetch(`/api/projects/${id}`, {
+      const res = await fetch(`${API_BASE}/api/projects/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete project");
     },
     autoSelect: async (id: number, threshold: number) => {
-      const res = await fetch(`/api/projects/${id}/auto-select`, {
+      const res = await fetch(`${API_BASE}/api/projects/${id}/auto-select`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ threshold }),
@@ -40,19 +42,19 @@ export const apiClient = {
       return res.json();
     },
     syncZotero: async (id: number) => {
-      const res = await fetch(`/api/projects/${id}/export/zotero`, { method: "POST" });
+      const res = await fetch(`${API_BASE}/api/projects/${id}/export/zotero`, { method: "POST" });
       if (!res.ok) throw new Error("Failed to sync with Zotero");
       return res.json();
     },
     zoteroStatus: async (id: number) => {
-      const res = await fetch(`/api/projects/${id}/export/zotero/status`);
+      const res = await fetch(`${API_BASE}/api/projects/${id}/export/zotero/status`);
       if (!res.ok) throw new Error("Failed to get Zotero status");
       return res.json();
     }
   },
   papers: {
     save: async (projectId: number, searchId: number, selections: { temp_index: number; is_included: boolean | null }[]) => {
-      const res = await fetch(`/api/projects/${projectId}/papers/save`, {
+      const res = await fetch(`${API_BASE}/api/projects/${projectId}/papers/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ search_id: searchId, selections }),
@@ -61,7 +63,8 @@ export const apiClient = {
       return res.json();
     },
     list: async (projectId: number, params?: Record<string, string | number | boolean>): Promise<PaperListOut> => {
-      const url = new URL(`/api/projects/${projectId}/papers`, window.location.origin);
+      const base = API_BASE || window.location.origin;
+      const url = new URL(`${base}/api/projects/${projectId}/papers`);
       if (params) {
         Object.entries(params).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
@@ -74,12 +77,12 @@ export const apiClient = {
       return res.json();
     },
     get: async (id: number): Promise<PaperDetailOut> => {
-      const res = await fetch(`/api/papers/${id}`);
+      const res = await fetch(`${API_BASE}/api/papers/${id}`);
       if (!res.ok) throw new Error("Paper not found");
       return res.json();
     },
     toggleInclude: async (id: number, is_included: boolean | null) => {
-      const res = await fetch(`/api/papers/${id}/include`, {
+      const res = await fetch(`${API_BASE}/api/papers/${id}/include`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_included }),
@@ -88,7 +91,7 @@ export const apiClient = {
       return res.json();
     },
     update: async (id: number, data: any) => {
-      const res = await fetch(`/api/papers/${id}`, {
+      const res = await fetch(`${API_BASE}/api/papers/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -97,12 +100,12 @@ export const apiClient = {
       return res.json();
     },
     extract: async (id: number) => {
-      const res = await fetch(`/api/papers/${id}/extract`, { method: "POST" });
+      const res = await fetch(`${API_BASE}/api/papers/${id}/extract`, { method: "POST" });
       if (!res.ok) throw new Error("AI Extraction failed");
       return res.json();
     },
     bulkExtract: async (projectId: number, data: any) => {
-      const res = await fetch(`/api/projects/${projectId}/papers/extract`, {
+      const res = await fetch(`${API_BASE}/api/projects/${projectId}/papers/extract`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -111,7 +114,7 @@ export const apiClient = {
       return res.json();
     },
     bulkInclude: async (projectId: number, data: any) => {
-      const res = await fetch(`/api/projects/${projectId}/papers/bulk-include`, {
+      const res = await fetch(`${API_BASE}/api/projects/${projectId}/papers/bulk-include`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -120,7 +123,7 @@ export const apiClient = {
       return res.json();
     },
     bulkKeywords: async (projectId: number, data: any) => {
-      const res = await fetch(`/api/projects/${projectId}/papers/bulk-keywords`, {
+      const res = await fetch(`${API_BASE}/api/projects/${projectId}/papers/bulk-keywords`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -131,7 +134,7 @@ export const apiClient = {
   },
   search: {
     execute: async (projectId: number, query: string, mode: string = "standard", yearMin?: number, yearMax?: number, limit?: number) => {
-      const res = await fetch(`/api/projects/${projectId}/search`, {
+      const res = await fetch(`${API_BASE}/api/projects/${projectId}/search`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -148,12 +151,12 @@ export const apiClient = {
   },
   keywords: {
     list: async () => {
-      const res = await fetch("/api/keywords");
+      const res = await fetch(`${API_BASE}/api/keywords`);
       if (!res.ok) throw new Error("Failed to fetch keywords");
       return res.json();
     },
     create: async (data: any) => {
-      const res = await fetch("/api/keywords", {
+      const res = await fetch(`${API_BASE}/api/keywords`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -162,7 +165,7 @@ export const apiClient = {
       return res.json();
     },
     update: async (id: number, data: any) => {
-      const res = await fetch(`/api/keywords/${id}`, {
+      const res = await fetch(`${API_BASE}/api/keywords/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -171,7 +174,7 @@ export const apiClient = {
       return res.json();
     },
     delete: async (id: number) => {
-      const res = await fetch(`/api/keywords/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE}/api/keywords/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete keyword");
     }
   }

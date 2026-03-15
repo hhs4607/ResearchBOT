@@ -1,0 +1,17 @@
+.venv/
+.git/
+.next/
+node_modules/
+web/
+data/*.db
+data/*.db-wal
+data/*.db-shm
+output/
+*.pyc
+__pycache__/
+.env
+.agent/
+.claude/
+openspec/
+memory/
+docs/
