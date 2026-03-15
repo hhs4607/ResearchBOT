@@ -34,7 +34,7 @@ export default function Home() {
     <div className="flex min-h-[80vh] flex-col items-center justify-center p-6 text-center">
       <div className="mb-8 flex items-center justify-center gap-3">
         <div className="rounded-2xl bg-primary/10 p-4">
-          <BookOpen className="h-12 w-12 text-primary" />
+          <BookOpen className="h-12 w-12 text-primary" aria-hidden="true" />
         </div>
         <h1 className="text-5xl font-extrabold tracking-tight">ResearchBot</h1>
       </div>
@@ -45,10 +45,10 @@ export default function Home() {
       </p>
 
       <div className="w-full max-w-3xl space-y-6">
-        <div className="flex items-center gap-4 rounded-xl bg-card p-4 shadow-sm border">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 rounded-xl bg-card p-4 shadow-sm border">
           <div className="flex-1 space-y-2 text-left">
             <label className="text-sm font-medium text-muted-foreground ml-1 flex items-center gap-2">
-              <FolderOpen className="w-3 h-3" /> Active Project
+              <FolderOpen className="w-3 h-3" aria-hidden="true" /> Active Project
             </label>
             {isLoading ? (
               <Skeleton className="h-10 w-full" />
@@ -64,10 +64,15 @@ export default function Home() {
                   onValueChange={(v) => v && setProjectId(parseInt(v))}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a project" />
+                    <SelectValue placeholder="Select a project">
+                      {(value: string) => {
+                        const p = projects.find((proj) => proj.id.toString() === value);
+                        return p ? `${p.name} (${p.paper_counts?.total || 0} papers)` : value;
+                      }}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {projects.map((p: any) => (
+                    {projects.map((p) => (
                       <SelectItem key={p.id} value={p.id.toString()}>
                         {p.name} ({p.paper_counts?.total || 0} papers)
                       </SelectItem>
@@ -80,11 +85,20 @@ export default function Home() {
           </div>
           <div className="flex-[0.5] space-y-2 text-left">
             <label className="text-sm font-medium text-muted-foreground ml-1 flex items-center gap-1">
-              <Sparkles className="h-3 w-3" /> Search Mode
+              <Sparkles className="h-3 w-3" aria-hidden="true" /> Search Mode
             </label>
             <Select value={mode} onValueChange={(v) => v && setMode(v)}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Search Mode" />
+                <SelectValue placeholder="Search Mode">
+                  {(value: string) => {
+                    const labels: Record<string, string> = {
+                      quick: "Quick (1 source)",
+                      standard: "Standard (3 sources)",
+                      deep: "Deep (6 sources)",
+                    };
+                    return labels[value] || value;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="quick">Quick (1 source)</SelectItem>

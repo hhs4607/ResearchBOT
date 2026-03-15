@@ -19,16 +19,17 @@ import { apiClient } from "@/lib/api/client";
 interface ExtractionDialogProps {
   paperIds: number[];
   isBulk?: boolean;
+  projectId?: number;
 }
 
-export function ExtractionDialog({ paperIds, isBulk = false }: ExtractionDialogProps) {
+export function ExtractionDialog({ paperIds, isBulk = false, projectId }: ExtractionDialogProps) {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const extractMutation = useMutation({
     mutationFn: async () => {
-      if (isBulk) {
-        await apiClient.papers.bulkExtract(1, { paper_ids: paperIds }); // projectId hardcoded to 1
+      if (isBulk && projectId) {
+        await apiClient.papers.bulkExtract(projectId, { paper_ids: paperIds });
       } else {
         await apiClient.papers.extract(paperIds[0]);
       }
@@ -49,21 +50,18 @@ export function ExtractionDialog({ paperIds, isBulk = false }: ExtractionDialogP
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        {isBulk ? (
-          <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 gap-2">
-            <Sparkles className="h-4 w-4" /> Extract AI
-          </div>
-        ) : (
-          <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-3 gap-2">
-            <Sparkles className="h-4 w-4" /> Extract using Gemini
-          </div>
-        )}
+      <DialogTrigger
+        render={
+          <Button variant={isBulk ? "outline" : "secondary"} size="sm" className="gap-2" />
+        }
+      >
+        <Sparkles className="h-4 w-4" aria-hidden="true" />
+        {isBulk ? "Extract AI" : "Extract using Gemini"}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <BrainCircuit className="h-5 w-5 text-primary" />
+            <BrainCircuit className="h-5 w-5 text-primary" aria-hidden="true" />
             {isBulk ? `Extract Data from ${paperIds.length} Papers` : "Extract Data"}
           </DialogTitle>
           <DialogDescription>
@@ -75,7 +73,7 @@ export function ExtractionDialog({ paperIds, isBulk = false }: ExtractionDialogP
           {extractMutation.isPending ? (
             <div className="flex flex-col items-center gap-4 text-muted-foreground">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <p className="text-sm">Analyzing document structure and extracting key entities...</p>
+              <p className="text-sm">Analyzing document structure and extracting key entities…</p>
             </div>
           ) : (
             <div className="text-sm text-center text-muted-foreground">

@@ -10,7 +10,7 @@ import { Settings, Database, Key, FolderOpen } from "lucide-react";
 
 export default function SettingsPage() {
   const { projectId, projects } = useProject();
-  const currentProject = projects.find((p: any) => p.id === projectId);
+  const currentProject = projects.find((p) => p.id === projectId);
 
   const { data: keywordData } = useQuery({
     queryKey: ["keywords"],
@@ -47,12 +47,12 @@ export default function SettingsPage() {
                 <span className="font-semibold">{currentProject.paper_counts?.total || 0}</span>
               </div>
               <div className="rounded-lg bg-green-500/10 px-3 py-2">
-                <span className="text-green-700">Included:</span>{" "}
-                <span className="font-semibold text-green-700">{currentProject.paper_counts?.included || 0}</span>
+                <span className="text-green-700 dark:text-green-400">Included:</span>{" "}
+                <span className="font-semibold text-green-700 dark:text-green-400">{currentProject.paper_counts?.included || 0}</span>
               </div>
               <div className="rounded-lg bg-red-500/10 px-3 py-2">
-                <span className="text-red-700">Excluded:</span>{" "}
-                <span className="font-semibold text-red-700">{currentProject.paper_counts?.excluded || 0}</span>
+                <span className="text-red-700 dark:text-red-400">Excluded:</span>{" "}
+                <span className="font-semibold text-red-700 dark:text-red-400">{currentProject.paper_counts?.excluded || 0}</span>
               </div>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function SettingsPage() {
           {["OpenAlex", "Semantic Scholar", "arXiv", "CrossRef", "PubMed", "Google Scholar"].map((source) => (
             <div key={source} className="flex items-center justify-between py-1">
               <span>{source}</span>
-              <Badge variant="outline" className="bg-green-500/10 text-green-700">Connected</Badge>
+              <Badge variant="outline" className="bg-green-500/10 text-green-700 dark:text-green-400">Connected</Badge>
             </div>
           ))}
           <div className="flex items-center justify-between py-1 border-t pt-3 mt-2">

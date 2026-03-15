@@ -45,12 +45,12 @@ export function CreateProjectDialog() {
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Project Name</label>
-            <Input placeholder="e.g., PINN Fatigue Review 2026" value={name} onChange={(e) => setName(e.target.value)} />
+            <label htmlFor="project-name" className="text-sm font-medium">Project Name</label>
+            <Input id="project-name" name="project_name" placeholder="e.g., PINN Fatigue Review 2026…" value={name} onChange={(e) => setName(e.target.value)} autoComplete="off" />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium">Description (optional)</label>
-            <Textarea placeholder="Brief description of this review..." value={description} onChange={(e) => setDescription(e.target.value)} />
+            <label htmlFor="project-desc" className="text-sm font-medium">Description (optional)</label>
+            <Textarea id="project-desc" name="project_description" placeholder="Brief description of this review…" value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
         </div>
         <DialogFooter>
@@ -74,10 +74,10 @@ export function DeleteProjectButton({ projectId, projectName }: { projectId: num
     try {
       await apiClient.projects.delete(projectId);
       await refetchProjects();
-      const remaining = projects.filter(p => p.id !== projectId);
-      if (remaining.length > 0) {
-        setProjectId(remaining[0].id);
-      }
+      // After refetch, projects in context will update; use a timeout to let state settle
+      setTimeout(() => {
+        // The context will auto-select first project if current is deleted
+      }, 100);
     } catch (e) {
       console.error("Failed to delete project:", e);
     } finally {

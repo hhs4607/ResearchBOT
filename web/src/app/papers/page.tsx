@@ -21,6 +21,7 @@ import {
   CheckCircle2, XCircle, HelpCircle, ChevronLeft, ChevronRight,
   SlidersHorizontal, Eye, Loader2, FolderOpen
 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function PapersPage() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function PapersPage() {
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<FilterState>({});
 
-  const currentProject = projects.find((p: any) => p.id === projectId);
+  const currentProject = projects.find((p) => p.id === projectId);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["papers", projectId, page, filters],
@@ -49,9 +50,9 @@ export default function PapersPage() {
   });
 
   const getScoreColor = (score: number) => {
-    if (score >= 0.8) return "bg-green-500/10 text-green-700";
-    if (score >= 0.5) return "bg-yellow-500/10 text-yellow-700";
-    return "bg-red-500/10 text-red-700";
+    if (score >= 0.8) return "bg-green-500/10 text-green-700 dark:text-green-400";
+    if (score >= 0.5) return "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400";
+    return "bg-red-500/10 text-red-700 dark:text-red-400";
   };
 
   const papers = data?.papers || [];
@@ -60,7 +61,7 @@ export default function PapersPage() {
 
   const toggleSelectAll = () => {
     if (allSelected) setSelectedIds(new Set());
-    else setSelectedIds(new Set(papers.map((p: any) => p.id)));
+    else setSelectedIds(new Set(papers.map((p) => p.id)));
   };
 
   const toggleSelectOne = (id: number) => {
@@ -75,7 +76,7 @@ export default function PapersPage() {
     setAutoSelectLoading(true);
     try {
       const result = await apiClient.projects.autoSelect(projectId, threshold);
-      alert(`Auto-selected ${result.papers_selected} papers above ${(threshold * 100).toFixed(0)}% threshold.`);
+      toast.success(`Auto-selected ${result.papers_selected} papers above ${(threshold * 100).toFixed(0)}% threshold.`);
       queryClient.invalidateQueries({ queryKey: ["papers", projectId] });
     } catch (e) {
       console.error("Auto-select failed:", e);
@@ -137,13 +138,13 @@ export default function PapersPage() {
               <Button variant="secondary" size="sm" className="gap-1 bg-red-500/10 text-red-700 hover:bg-red-500/20" onClick={() => handleBulkInclude(false)}>
                 <XCircle className="h-4 w-4" /> Exclude
               </Button>
-              <ExtractionDialog paperIds={Array.from(selectedIds)} isBulk />
+              <ExtractionDialog paperIds={Array.from(selectedIds)} isBulk projectId={projectId} />
             </div>
           )}
           <FilterPanel onFilterChange={handleFilterChange} showIncludeStatus />
           <Popover>
-            <PopoverTrigger className="inline-flex shrink-0 items-center justify-center rounded-lg border border-border bg-background text-sm font-medium hover:bg-muted hover:text-foreground h-7 gap-1 px-2.5">
-              <SlidersHorizontal className="h-4 w-4" /> Threshold
+            <PopoverTrigger render={<Button variant="outline" size="sm" className="gap-1" />}>
+              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> Threshold
             </PopoverTrigger>
             <PopoverContent className="w-80">
               <div className="space-y-4">
@@ -183,7 +184,7 @@ export default function PapersPage() {
           </div>
         ) : papers.length ? (
           <div className="flex flex-col gap-4">
-            <div className="rounded-xl border bg-card shadow-sm">
+            <div className="rounded-xl border bg-card shadow-sm overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -234,7 +235,7 @@ export default function PapersPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-center">
-                        <Badge variant="outline" className={`font-mono ${getScoreColor(paper.ai_relevance_score || 0)}`}>
+                        <Badge variant="outline" className={`font-mono tabular-nums ${getScoreColor(paper.ai_relevance_score || 0)}`}>
                           {((paper.ai_relevance_score || 0) * 100).toFixed(0)}
                         </Badge>
                       </TableCell>
@@ -269,10 +270,10 @@ export default function PapersPage() {
                   <span className="text-sm font-medium">
                     Page {data.pagination.page} of {data.pagination.total_pages}
                   </span>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={page <= 1} onClick={() => setPage(p => p - 1)} aria-label="Previous page">
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={page >= (data?.pagination?.total_pages || 1)} onClick={() => setPage(p => p + 1)}>
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0" disabled={page >= (data?.pagination?.total_pages || 1)} onClick={() => setPage(p => p + 1)} aria-label="Next page">
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>

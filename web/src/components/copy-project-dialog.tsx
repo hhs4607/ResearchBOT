@@ -21,6 +21,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api/client";
 import { Copy, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface CopyProjectDialogProps {
   paperId: number;
@@ -43,12 +44,12 @@ export function CopyProjectDialog({ paperId, currentProjectId }: CopyProjectDial
     if (!selectedProject) return;
     setIsCopying(true);
     try {
-      // Mock API call to copy endpoint
-      // POST /api/papers/{paperId}/copy { target_project_id: selectedProject }
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await apiClient.papers.copy(paperId, parseInt(selectedProject));
+      toast.success("Paper copied successfully");
       setOpen(false);
       setSelectedProject("");
     } catch (error) {
+      toast.error("Failed to copy paper. It may already exist in the target project.");
       console.error("Failed to copy paper", error);
     } finally {
       setIsCopying(false);
@@ -57,10 +58,10 @@ export function CopyProjectDialog({ paperId, currentProjectId }: CopyProjectDial
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3 gap-2">
-          <Copy className="h-4 w-4" /> Copy to Project
-        </div>
+      <DialogTrigger
+        render={<Button variant="outline" size="sm" className="gap-2" />}
+      >
+        <Copy className="h-4 w-4" aria-hidden="true" /> Copy to Project
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -71,10 +72,15 @@ export function CopyProjectDialog({ paperId, currentProjectId }: CopyProjectDial
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">Destination Project</label>
+            <label htmlFor="dest-project" className="text-sm font-medium">Destination Project</label>
             <Select value={selectedProject} onValueChange={(v) => v && setSelectedProject(v)} disabled={isLoading}>
               <SelectTrigger>
-                <SelectValue placeholder={isLoading ? "Loading projects..." : "Select a project"} />
+                <SelectValue placeholder={isLoading ? "Loading projects…" : "Select a project"}>
+                  {(value: string) => {
+                    const p = availableProjects.find((proj) => proj.id.toString() === value);
+                    return p ? p.name : value;
+                  }}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {availableProjects.length === 0 ? (
@@ -94,7 +100,7 @@ export function CopyProjectDialog({ paperId, currentProjectId }: CopyProjectDial
           <Button variant="outline" onClick={() => setOpen(false)} disabled={isCopying}>
             Cancel
           </Button>
-          <Button onClick={handleCopy} disabled={!selectedProject || isCopying}>
+          <Button onClick={handleCopy} disabled={!selectedProject || isCopying} className="gap-2">
             {isCopying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Copy Paper
           </Button>

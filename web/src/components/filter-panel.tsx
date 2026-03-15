@@ -97,7 +97,9 @@ export function FilterPanel({ onFilterChange, showIncludeStatus = false }: Filte
             <div className="flex items-center gap-2">
               <Input
                 type="number"
-                placeholder="From"
+                name="year_min"
+                autoComplete="off"
+                placeholder="2020"
                 className="w-24"
                 value={filters.year_min || ""}
                 onChange={(e) => setFilters(prev => ({ ...prev, year_min: e.target.value ? parseInt(e.target.value) : undefined }))}
@@ -105,7 +107,9 @@ export function FilterPanel({ onFilterChange, showIncludeStatus = false }: Filte
               <span className="text-muted-foreground">&mdash;</span>
               <Input
                 type="number"
-                placeholder="To"
+                name="year_max"
+                autoComplete="off"
+                placeholder="2026"
                 className="w-24"
                 value={filters.year_max || ""}
                 onChange={(e) => setFilters(prev => ({ ...prev, year_max: e.target.value ? parseInt(e.target.value) : undefined }))}

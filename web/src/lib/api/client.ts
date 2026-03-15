@@ -1,5 +1,4 @@
 import { ProjectListOut, ProjectDetailOut, PaperListOut, PaperDetailOut } from "./types";
-import { MOCK_PROJECTS, MOCK_PAPERS } from "./mocks/data";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -97,6 +96,15 @@ export const apiClient = {
         body: JSON.stringify(data),
       });
       if (!res.ok) throw new Error("Failed to update paper");
+      return res.json();
+    },
+    copy: async (id: number, targetProjectId: number) => {
+      const res = await fetch(`${API_BASE}/api/papers/${id}/copy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target_project_id: targetProjectId }),
+      });
+      if (!res.ok) throw new Error("Failed to copy paper");
       return res.json();
     },
     extract: async (id: number) => {
