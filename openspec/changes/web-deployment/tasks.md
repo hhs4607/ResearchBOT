@@ -17,42 +17,42 @@
 
 ## 3. GitHub Repository
 
-- [ ] 3.1 Create GitHub repository (or use existing)
-- [ ] 3.2 Push all code to GitHub main branch
-- [ ] 3.3 Verify all files are present in remote
+- [x] 3.1 Create GitHub repository (or use existing) — https://github.com/hhs4607/ResearchBOT
+- [x] 3.2 Push all code to GitHub main branch
+- [x] 3.3 Verify all files are present in remote
 
 ## 4. Railway 배포
 
-- [ ] 4.1 Create Railway project, connect GitHub repo
-- [ ] 4.2 Set root directory to `/` (backend)
-- [ ] 4.3 Create Railway Volume, mount at `/data`
-- [ ] 4.4 Set Railway env vars: GEMINI_API_KEY, OPENALEX_EMAIL, S2_API_KEY, ZOTERO_USER_ID, ZOTERO_API_KEY, DATABASE_PATH=/data/research_bot.db, FRONTEND_URL=(Vercel URL, set after step 5)
-- [ ] 4.5 Deploy backend on Railway
-- [ ] 4.6 Verify backend: `curl https://<railway-url>/api/projects`
-- [ ] 4.7 Note the Railway public URL for frontend config
+- [x] 4.1 Create Railway project, connect GitHub repo
+- [x] 4.2 Set root directory to `/` (backend) — auto-detected Dockerfile
+- [x] 4.3 Create Railway Volume, mount at `/data`
+- [x] 4.4 Set Railway env vars (7 vars: GEMINI, OPENALEX, S2, ZOTERO x2, DATABASE_PATH, FRONTEND_URL)
+- [x] 4.5 Deploy backend on Railway
+- [x] 4.6 Verify backend: https://researchbot-production-113e.up.railway.app/api/projects ✅
+- [x] 4.7 Railway public URL: researchbot-production-113e.up.railway.app (port 8080)
 
 ## 5. Vercel 배포
 
-- [ ] 5.1 Create Vercel project, connect GitHub repo
-- [ ] 5.2 Set root directory to `web/`
-- [ ] 5.3 Set Vercel env var: NEXT_PUBLIC_API_URL=https://<railway-url>
-- [ ] 5.4 Deploy frontend on Vercel
-- [ ] 5.5 Verify frontend loads at Vercel URL
-- [ ] 5.6 Go back to Railway → update FRONTEND_URL env var with Vercel URL
+- [x] 5.1 Create Vercel project, connect GitHub repo
+- [x] 5.2 Set root directory to `web/`
+- [x] 5.3 Set Vercel env var: NEXT_PUBLIC_API_URL=https://researchbot-production-113e.up.railway.app
+- [x] 5.4 Deploy frontend on Vercel
+- [x] 5.5 Verify frontend: https://research-bot-azure.vercel.app ✅
+- [x] 5.6 Railway FRONTEND_URL updated with Vercel URL → CORS working
 
 ## 6. End-to-End 검증
 
-- [ ] 6.1 Open Vercel URL in browser
-- [ ] 6.2 Test: Create project
-- [ ] 6.3 Test: Search papers (OpenAlex at minimum)
-- [ ] 6.4 Test: Save papers to project
-- [ ] 6.5 Test: Paper detail view
-- [ ] 6.6 Test: Include/Exclude toggle
-- [ ] 6.7 Test: CSV export download
-- [ ] 6.8 Test: Gemini AI extraction (if API key set)
+- [x] 6.1 Open Vercel URL in browser — homepage loads with project selector
+- [x] 6.2 Test: Create project — "Deploy Test" created
+- [x] 6.3 Test: Search papers — "digital twin fatigue" → 60 papers, 3 sources
+- [x] 6.4 Test: Save papers to project — 3 papers saved
+- [x] 6.5 Test: Paper detail view — keywords, abstract, scores displayed
+- [x] 6.6 Test: Include/Exclude toggle — Status badges working
+- [x] 6.7 Test: CSV export — download working
+- [x] 6.8 Test: Gemini AI extraction — keywords+OMR extracted, auto-normalized
 
 ## 7. 마무리
 
-- [ ] 7.1 Run data migration on Railway (if needed): `python scripts/migrate_paperreviewbot.py`
+- [ ] 7.1 Run data migration on Railway (if needed)
 - [ ] 7.2 Commit deployment config files
 - [ ] 7.3 Update docs/COORDINATION.md with deployed URLs
