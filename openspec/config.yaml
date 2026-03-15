@@ -1,0 +1,22 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+context: |
+  - 직접적인 코드 구현보다 논의, 설계, 요구사항 분석 등을 우선합니다.
+  - 사소한 파일 수정을 포함한 모든 코드 구현 및 파일 작성은 사용자가 명시적으로 요청할 때만 진행합니다. 현재 파일수정 등은 대부분 Claude가 수행할 예정입니다.
+  - **나(AI Assistant)의 주 역할은 Front End(주로 Next.js 웹 기반) 작업과 코드 리뷰입니다.** 백엔드나 에이전트 CLI 구현 등 Claude와 겹치는 작업은 명시적 요청이 없는 한 피하며, 프론트엔드 작업 시에도 사용자의 지시를 따릅니다.
+  Tech stack: TypeScript, React, Node.js
+  We use conventional commits
+  Domain: ResearchBot / e-commerce platform
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours

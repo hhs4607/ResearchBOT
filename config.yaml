@@ -1,0 +1,45 @@
+# ResearchBot Configuration
+
+database:
+  path: "data/research_bot.db"
+
+search:
+  default_mode: "standard"         # quick | standard | deep
+  limit_per_source: 20
+  modes:
+    quick:
+      sources: ["openalex"]
+    standard:
+      sources: ["openalex", "semantic_scholar", "arxiv"]
+    deep:
+      sources: ["openalex", "semantic_scholar", "arxiv", "crossref", "pubmed", "google_scholar"]
+
+scoring:
+  weights:
+    text_match: 0.30
+    relevance: 0.20
+    citations: 0.15
+    multi_source: 0.15
+    recency: 0.10
+    abstract: 0.10
+    semantic: 0.00
+  penalty:
+    threshold: 0.30
+    factor: 0.50
+
+llm:
+  provider: gemini
+  model: "gemini-2.5-flash"
+
+export:
+  csv:
+    default_columns:
+      - title
+      - first_author
+      - doi
+      - venue
+      - year
+      - ai_keywords
+      - ai_objective
+      - ai_method
+      - ai_result
